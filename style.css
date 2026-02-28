@@ -1,0 +1,558 @@
+/* =============================================
+   GLOBALES
+   ============================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  background: #f0f0f0;
+  text-align: center;
+}
+
+/* =============================================
+   BOTONES — BASE
+   ============================================= */
+.btn {
+  display: block;
+  width: 280px;
+  margin: 8px auto;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-family: inherit;
+  border: none;
+  border-radius: 10px;
+  background: #1976d2;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn:hover { background: #1565c0; }
+
+/* Variante verde — portapapeles */
+.btn-success       { background: #4caf50; }
+.btn-success:hover { background: #388e3c; }
+
+/* Variante Google — login */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: #ffffff;
+  color: #3c4043;
+  border: 2px solid #dadce0;
+  font-size: 15px;
+  font-weight: 500;
+}
+.btn-google:hover {
+  background: #f8f9fa;
+  border-color: #c0c4c8;
+}
+
+/* Variante pequeña */
+.btn-sm {
+  width: auto;
+  padding: 6px 14px;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Variante outline (cabecera) */
+.btn-outline {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: white;
+}
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Variante outline (modal perfil) */
+.btn-outline-modal {
+  background: transparent;
+  border: 2px solid #e0e0e0;
+  color: #555;
+}
+.btn-outline-modal:hover {
+  background: #f5f5f5;
+}
+
+/* Botón leer portapapeles dentro del card del reto */
+.btn-leer-reto {
+  width: 100%;
+  margin: 14px 0 0;
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+/* =============================================
+   PANTALLA DE LOGIN
+   ============================================= */
+#loginScreen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+  z-index: 100;
+}
+
+#loginCard {
+  background: white;
+  border-radius: 20px;
+  padding: 44px 40px 36px;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+#loginCard h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  color: #1976d2;
+}
+
+.login-subtitle {
+  color: #666;
+  margin: 0 0 32px;
+  font-size: 15px;
+}
+
+.login-error {
+  color: #e53935;
+  font-size: 14px;
+  min-height: 20px;
+  margin: 12px 0 0;
+}
+
+/* =============================================
+   CABECERA DE USUARIO (app autenticada)
+   ============================================= */
+#appHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 10px 20px;
+  background: #1976d2;
+  color: white;
+}
+
+#userDisplayName {
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+#userDisplayName:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* =============================================
+   MAIN — CONTENIDO DE LA APP
+   ============================================= */
+main {
+  padding: 30px 20px;
+}
+
+main h1 {
+  margin: 0 0 20px;
+}
+
+/* =============================================
+   SECCIÓN DE AMIGOS
+   ============================================= */
+#friendsSection {
+  max-width: 480px;
+  margin: 0 auto 24px;
+  text-align: left;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.card-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888;
+}
+
+/* Código de amigo */
+.code-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+#friendCodeDisplay {
+  font-size: 26px;
+  letter-spacing: 6px;
+  font-family: 'Courier New', monospace;
+  color: #1976d2;
+}
+
+/* Formulario añadir amigo */
+.input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.input-row input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input-row input:focus {
+  border-color: #1976d2;
+}
+
+.form-msg {
+  margin: 8px 0 0;
+  font-size: 13px;
+  min-height: 18px;
+}
+
+.form-msg.error   { color: #e53935; }
+.form-msg.success { color: #388e3c; }
+
+/* Lista de amigos */
+#friendsList {
+  margin-top: 8px;
+}
+
+.friend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.friend-item:last-child { border-bottom: none; }
+
+.friend-name {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.empty-msg {
+  color: #aaa;
+  font-size: 14px;
+  margin: 8px 0 0;
+}
+
+/* =============================================
+   CONTENEDOR DE JUEGO (IFRAME — overlay fijo)
+   ============================================= */
+#gameContainer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  background: white;
+}
+
+#topBar {
+  height: 50px;
+  background: #222;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  flex-shrink: 0;
+}
+
+#closeBtn {
+  background: #e53935;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+iframe {
+  width: 100%;
+  flex: 1;
+  border: none;
+}
+
+/* =============================================
+   VISTA DE RETO — NAVEGACIÓN
+   ============================================= */
+#challengeNav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#challengeTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: #222;
+}
+
+#challengeContent {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: left;
+}
+
+/* =============================================
+   BOTONES DE JUEGO — ESTADOS (vista de reto)
+   ============================================= */
+#juegosBotones {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.juego-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: filter 0.15s;
+}
+
+.juego-btn-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.juego-btn-status {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* Amarillo — sin jugar, clickable */
+.juego-btn--unplayed {
+  background: #fff8e1;
+  color: #e65100;
+  cursor: pointer;
+  border: 2px solid #ffe082;
+}
+.juego-btn--unplayed:hover {
+  filter: brightness(0.96);
+}
+
+/* Gris — jugado, esperando al rival */
+.juego-btn--waiting {
+  background: #f5f5f5;
+  color: #757575;
+  cursor: default;
+  border: 2px solid #e0e0e0;
+}
+
+/* Color del ganador — ambos jugaron */
+.juego-btn--result {
+  color: white;
+  cursor: default;
+  border: 2px solid transparent;
+}
+.juego-btn--result .juego-btn-status {
+  opacity: 0.85;
+}
+
+/* =============================================
+   HISTORIAL
+   ============================================= */
+.history-day {
+  padding: 10px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.history-day:last-child { border-bottom: none; }
+
+.history-date {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.history-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.pill {
+  font-size: 12px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: #f0f0f0;
+  color: #777;
+  font-family: 'Courier New', monospace;
+}
+
+.pill.win  { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
+.pill.lose { background: #ffebee; color: #c62828; }
+.pill.tie  { background: #fff3e0; color: #e65100; }
+
+/* =============================================
+   MODAL DE PERFIL
+   ============================================= */
+#profileModal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+}
+
+#profileCard {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 28px 24px;
+  width: 90%;
+  max-width: 340px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  text-align: left;
+}
+
+#profileCard h2 {
+  margin: 0 0 24px;
+  font-size: 20px;
+  color: #1976d2;
+  text-align: center;
+}
+
+.profile-field {
+  margin-bottom: 20px;
+}
+
+.profile-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.profile-field input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.profile-field input:focus {
+  border-color: #1976d2;
+}
+
+/* Paleta de colores */
+#colorSwatches {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.color-swatch:hover {
+  transform: scale(1.12);
+}
+
+.color-swatch.selected {
+  outline: 3px solid #333;
+  outline-offset: 3px;
+}
+
+/* Botones del modal */
+.profile-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* =============================================
+   TOAST GLOBAL
+   ============================================= */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #2e7d32;
+  color: white;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  z-index: 300;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+#toast.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+#toast.toast-error {
+  background: #e53935;
+}

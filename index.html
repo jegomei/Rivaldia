@@ -1,179 +1,174 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agregador retos diarios</title>
-
-<style>
-  body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 30px;
-    background: #f0f0f0;
-    text-align: center;
-  }
-
-  .btn {
-    display: block;
-    width: 280px;
-    margin: 8px auto;
-    padding: 14px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 10px;
-    background: #1976d2;
-    color: white;
-    cursor: pointer;
-  }
-
-  .btn:hover { background: #1565c0; }
-
-  #gameContainer {
-    margin: 30px auto;
-    width: 95%;
-    max-width: 1000px;
-    height: 600px;
-    border: 4px solid #333;
-    border-radius: 16px;
-    overflow: hidden;
-    display: none;
-    background: white;
-  }
-
-  #topBar {
-    height: 50px;
-    background: #222;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 15px;
-  }
-
-  #closeBtn {
-    background: #e53935;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
-  }
-
-  iframe {
-    width: 100%;
-    height: calc(100% - 50px);
-    border: none;
-  }
-
-  #resultadoBox {
-    margin-top: 20px;
-    padding: 15px;
-    background: white;
-    border-radius: 10px;
-    display: inline-block;
-    min-width: 300px;
-    text-align: left;
-  }
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retos Diarios</title>
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 
-<h1>Agregador de retos diarios</h1>
+  <!-- ════════════════════════════════════════
+       PANTALLA DE LOGIN
+  ═══════════════════════════════════════════ -->
+  <div id="loginScreen">
+    <div id="loginCard">
+      <h1>Retos Diarios</h1>
+      <p class="login-subtitle">Compite cada día con tus amigos</p>
 
-<button class="btn" onclick="abrirJuego('Sumplete','https://sumplete.com/')">Sumplete</button>
-<button class="btn" onclick="abrirJuego('Shikaku','https://shikakuofthe.day/')">Shikaku</button>
-<button class="btn" onclick="abrirJuego('Cinco','https://puzzlepass.io/en/cinco/cinco-medium/?playlist=numbers')">Cinco</button>
-<button class="btn" onclick="abrirJuego('Cuordle','https://jegomei.github.io/Cuardle/')">Cuordle</button>
+      <button class="btn btn-google" id="btnGoogle">
+        <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Entrar con Google
+      </button>
 
-<div id="gameContainer">
-  <div id="topBar">
-    <span id="gameTitle">Juego</span>
-    <button id="closeBtn" onclick="cerrarJuego()">Cerrar</button>
+      <p id="loginError" class="login-error"></p>
+    </div>
   </div>
-  <iframe id="gameFrame"></iframe>
-</div>
 
-<button class="btn" style="background:#4CAF50;" onclick="leerResultado()">Leer resultado del portapapeles</button>
 
-<div id="resultadoBox">
-  <strong>Último resultado detectado:</strong>
-  <div id="resultado">---</div>
-</div>
+  <!-- ════════════════════════════════════════
+       APP PRINCIPAL
+  ═══════════════════════════════════════════ -->
+  <div id="appContainer" style="display:none">
 
-<script>
-function abrirJuego(nombre, url) {
-  document.getElementById("gameTitle").textContent = nombre;
-  document.getElementById("gameFrame").src = url;
-  document.getElementById("gameContainer").style.display = "block";
-}
+    <!-- Cabecera de usuario -->
+    <header id="appHeader">
+      <span id="userDisplayName" title="Editar perfil"></span>
+      <button class="btn btn-sm btn-outline" id="btnSignOut">Cerrar sesión</button>
+    </header>
 
-function cerrarJuego() {
-  document.getElementById("gameFrame").src = "";
-  document.getElementById("gameContainer").style.display = "none";
-}
+    <!-- ══ VISTA PRINCIPAL ════════════════════ -->
+    <div id="mainView">
+      <main>
+        <h1>Retos Diarios</h1>
 
-async function leerResultado() {
-  try {
-    const texto = await navigator.clipboard.readText();
-    const hoy = new Date().toISOString().split("T")[0];
+        <!-- ── SECCIÓN DE AMIGOS ─────────────────── -->
+        <section id="friendsSection">
 
-    // ---------- SUMPLETE ----------
-    if (texto.includes("#sumplete")) {
-      const match = texto.match(/in\s+(\d{2}:\d{2}\.\d{2})/);
-      if (match) {
-        guardar("sumplete", hoy, { tiempo: match[1] });
-        mostrar(`Sumplete (${hoy}) → ${match[1]}`);
-        return;
-      }
-    }
+          <!-- Mi código de amigo -->
+          <div class="card" id="myCodeCard">
+            <span class="card-label">Tu código de amigo</span>
+            <div class="code-display">
+              <strong id="friendCodeDisplay">······</strong>
+              <button class="btn btn-sm" id="btnCopyCode">Copiar</button>
+            </div>
+          </div>
 
-    // ---------- SHIKAKU ----------
-    if (texto.includes("#ShikakuOfTheDay")) {
+          <!-- Añadir amigo -->
+          <div class="card">
+            <span class="card-label">Añadir amigo</span>
+            <div class="input-row">
+              <input type="text" id="friendCodeInput"
+                     placeholder="Código (6 caracteres)"
+                     maxlength="6" autocomplete="off" spellcheck="false">
+              <button class="btn btn-sm" id="btnAddFriend">Añadir</button>
+            </div>
+            <p id="addFriendMsg" class="form-msg"></p>
+          </div>
 
-      const easyMatch = texto.match(/#EASY\d+\s+⏱️\s+(\d{2}:\d{2}\.\d{2})/);
-      const mediumMatch = texto.match(/#MEDIUM\d+\s+⏱️\s+(\d{2}:\d{2}\.\d{2})/);
+          <!-- Lista de amigos -->
+          <div class="card">
+            <span class="card-label">Amigos</span>
+            <div id="friendsList">
+              <p class="empty-msg">Cargando...</p>
+            </div>
+          </div>
 
-      let resultado = {};
+          <!-- ⚠️ DEV ONLY — borrar antes de producción -->
+          <div class="card" id="devCard" style="border: 2px dashed #f9a825; background:#fffde7;">
+            <span class="card-label" style="color:#f9a825;">⚠️ Dev Tools</span>
+            <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-sm" id="btnCrearFake" style="background:#f9a825; color:#333; width:auto;">
+                Crear amigo ficticio
+              </button>
+              <span id="devMsg" style="font-size:13px; color:#555; align-self:center;"></span>
+            </div>
+          </div>
+          <!-- /DEV ONLY -->
 
-      if (easyMatch) resultado.easy = easyMatch[1];
-      if (mediumMatch) resultado.medium = mediumMatch[1];
+        </section>
 
-      guardar("shikaku", hoy, resultado);
+        <!-- Portapapeles (vista principal) -->
+        <button class="btn btn-success" id="btnLeer">📋 Leer resultado del portapapeles</button>
 
-      mostrar(`Shikaku (${hoy})
-EASY → ${resultado.easy || "-"}
-MEDIUM → ${resultado.medium || "-"}`);
+      </main>
+    </div><!-- /#mainView -->
 
-      return;
-    }
 
-    // ---------- CINCO ----------
-    if (texto.includes("Cinco of the day")) {
-      const match = texto.match(/took me (\d{2}:\d{2})/);
-      if (match) {
-        guardar("cinco", hoy, { tiempo: match[1] });
-        mostrar(`Cinco (${hoy}) → ${match[1]}`);
-        return;
-      }
-    }
+    <!-- ══ VISTA DE RETO ══════════════════════ -->
+    <div id="challengeView" style="display:none">
 
-    mostrar("No se reconoce el formato del texto copiado.");
+      <div id="challengeNav">
+        <button class="btn btn-sm" id="btnBack">← Volver</button>
+        <span id="challengeTitle"></span>
+      </div>
 
-  } catch (err) {
-    mostrar("Error al leer el portapapeles (requiere HTTPS).");
-  }
-}
+      <div id="challengeContent">
 
-function guardar(juego, fecha, datos) {
-  localStorage.setItem(juego + "_" + fecha, JSON.stringify(datos));
-}
+        <!-- Botones de juego (estado de hoy) -->
+        <div class="card">
+          <span class="card-label">Hoy — <span id="todayDateLabel"></span></span>
+          <div id="juegosBotones"></div>
+          <button class="btn btn-success btn-leer-reto" id="btnLeerReto">📋 Leer portapapeles</button>
+        </div>
 
-function mostrar(texto) {
-  document.getElementById("resultado").textContent = texto;
-}
-</script>
+        <!-- Historial últimos 7 días -->
+        <div class="card">
+          <span class="card-label">Historial (últimos 7 días)</span>
+          <div id="historyList">
+            <p class="empty-msg">Sin resultados anteriores.</p>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /#challengeView -->
+
+
+    <!-- ══ IFRAME DE JUEGOS (overlay fijo) ═══ -->
+    <div id="gameContainer">
+      <div id="topBar">
+        <span id="gameTitle">Juego</span>
+        <button id="closeBtn">Cerrar</button>
+      </div>
+      <iframe id="gameFrame" title="Juego embebido"></iframe>
+    </div>
+
+
+    <!-- ══ MODAL DE PERFIL ════════════════════ -->
+    <div id="profileModal" style="display:none">
+      <div id="profileCard">
+        <h2>Tu perfil</h2>
+
+        <div class="profile-field">
+          <label for="profileNickname">Nickname</label>
+          <input type="text" id="profileNickname" maxlength="20" autocomplete="off">
+        </div>
+
+        <div class="profile-field">
+          <label>Color</label>
+          <div id="colorSwatches"></div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="btn btn-sm" id="btnGuardarPerfil">Guardar</button>
+          <button class="btn btn-sm btn-outline-modal" id="btnCerrarPerfil">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#appContainer -->
+
+
+  <!-- ══ TOAST GLOBAL ═══════════════════════ -->
+  <div id="toast"></div>
+
+
+  <script type="module" src="app.js"></script>
 
 </body>
 </html>
