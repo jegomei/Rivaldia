@@ -294,17 +294,22 @@ function renderHistorial(entries, friendColor) {
   }
 }
 
-function ultimosDias(n) {
-  return Array.from({ length: n }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (i + 1));
-    return d.toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' });
-  });
+// Fecha en zona horaria de Madrid (devuelve YYYY-MM-DD)
+// Usa Intl.DateTimeFormat + en-CA (formato ISO, sin depender de sv-SE ni del
+// timezone del sistema del navegador).
+function fechaHoy() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(new Date());
 }
 
-// Fecha actual en zona horaria de Madrid (devuelve YYYY-MM-DD)
-function fechaHoy() {
-  return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' });
+// Últimos n días en zona horaria de Madrid (i=0 → ayer, i=n-1 → hace n días).
+// Ancla en el mediodía UTC del día Madrid actual para evitar problemas de DST.
+function ultimosDias(n) {
+  const hoy    = fechaHoy();                              // 'YYYY-MM-DD'
+  const noonMs = new Date(hoy + 'T12:00:00Z').getTime(); // mediodía UTC de hoy (Madrid)
+  const fmt    = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' });
+  return Array.from({ length: n }, (_, i) =>
+    fmt.format(new Date(noonMs - (i + 1) * 86_400_000))
+  );
 }
 
 function formatFecha(dateStr) {
