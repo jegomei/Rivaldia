@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Retos Diarios</title>
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -36,40 +36,81 @@
   ═══════════════════════════════════════════ -->
   <div id="appContainer" style="display:none">
 
-    <!-- Cabecera de usuario -->
+    <!-- Cabecera — botón home + título contextual -->
     <header id="appHeader">
-      <span id="userDisplayName" title="Editar perfil"></span>
-      <button class="btn btn-sm btn-outline" id="btnSignOut">Cerrar sesión</button>
+      <button id="btnHome" class="btn-home" aria-label="Ir al inicio">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+      </button>
+      <span id="headerTitle"></span>
     </header>
+
 
     <!-- ══ VISTA PRINCIPAL ════════════════════ -->
     <div id="mainView">
       <main>
         <h1>Retos Diarios</h1>
 
-        <!-- ── SECCIÓN DE AMIGOS ─────────────────── -->
         <section id="friendsSection">
 
-          <!-- Mi código de amigo -->
-          <div class="card" id="myCodeCard">
-            <span class="card-label">Tu código de amigo</span>
-            <div class="code-display">
-              <strong id="friendCodeDisplay">······</strong>
-              <button class="btn btn-sm" id="btnCopyCode">Copiar</button>
-            </div>
-          </div>
+          <!-- Perfil colapsable -->
+          <div class="card" id="profileCard">
 
-          <!-- Añadir amigo -->
-          <div class="card">
-            <span class="card-label">Añadir amigo</span>
-            <div class="input-row">
-              <input type="text" id="friendCodeInput"
-                     placeholder="Código (6 caracteres)"
-                     maxlength="6" autocomplete="off" spellcheck="false">
-              <button class="btn btn-sm" id="btnAddFriend">Añadir</button>
+            <!-- Cabecera del acordeón (siempre visible) -->
+            <div id="profileToggle">
+              <span id="userDisplayName">···</span>
+              <span id="profileArrow">▼</span>
             </div>
-            <p id="addFriendMsg" class="form-msg"></p>
-          </div>
+
+            <!-- Contenido expandible -->
+            <div id="profileContent" style="display:none">
+
+              <div class="profile-divider"></div>
+
+              <!-- Editar nickname -->
+              <div class="profile-field">
+                <label class="card-label" for="profileNickname">Nickname</label>
+                <div class="input-row" style="margin-top:6px;">
+                  <input type="text" id="profileNickname" maxlength="20" autocomplete="off">
+                  <button class="btn btn-sm" id="btnGuardarPerfil">Guardar</button>
+                </div>
+              </div>
+
+              <!-- Elegir color -->
+              <div class="profile-field">
+                <label class="card-label">Color</label>
+                <div id="colorSwatches"></div>
+              </div>
+
+              <div class="profile-divider"></div>
+
+              <!-- Código de amigo -->
+              <span class="card-label">Tu código de amigo</span>
+              <div class="code-display" style="margin-top:6px; margin-bottom:16px;">
+                <strong id="friendCodeDisplay">······</strong>
+                <button class="btn btn-sm" id="btnCopyCode">Copiar</button>
+              </div>
+
+              <!-- Añadir amigo -->
+              <span class="card-label">Añadir amigo</span>
+              <div class="input-row" style="margin-top:6px;">
+                <input type="text" id="friendCodeInput"
+                       placeholder="Código (6 caracteres)"
+                       maxlength="6" autocomplete="off" spellcheck="false">
+                <button class="btn btn-sm" id="btnAddFriend">Añadir</button>
+              </div>
+              <p id="addFriendMsg" class="form-msg"></p>
+
+              <div class="profile-divider"></div>
+
+              <!-- Cerrar sesión -->
+              <button class="btn btn-sm btn-outline-modal" id="btnSignOut" style="width:100%; margin-top:4px;">
+                Cerrar sesión
+              </button>
+
+            </div><!-- /#profileContent -->
+          </div><!-- /#profileCard -->
 
           <!-- Lista de amigos -->
           <div class="card">
@@ -103,11 +144,6 @@
     <!-- ══ VISTA DE RETO ══════════════════════ -->
     <div id="challengeView" style="display:none">
 
-      <div id="challengeNav">
-        <button class="btn btn-sm" id="btnBack">← Volver</button>
-        <span id="challengeTitle"></span>
-      </div>
-
       <div id="challengeContent">
 
         <!-- Botones de juego (estado de hoy) -->
@@ -136,29 +172,6 @@
         <button id="closeBtn">Cerrar</button>
       </div>
       <iframe id="gameFrame" title="Juego embebido"></iframe>
-    </div>
-
-
-    <!-- ══ MODAL DE PERFIL ════════════════════ -->
-    <div id="profileModal" style="display:none">
-      <div id="profileCard">
-        <h2>Tu perfil</h2>
-
-        <div class="profile-field">
-          <label for="profileNickname">Nickname</label>
-          <input type="text" id="profileNickname" maxlength="20" autocomplete="off">
-        </div>
-
-        <div class="profile-field">
-          <label>Color</label>
-          <div id="colorSwatches"></div>
-        </div>
-
-        <div class="profile-actions">
-          <button class="btn btn-sm" id="btnGuardarPerfil">Guardar</button>
-          <button class="btn btn-sm btn-outline-modal" id="btnCerrarPerfil">Cancelar</button>
-        </div>
-      </div>
     </div>
 
   </div><!-- /#appContainer -->

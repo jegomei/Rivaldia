@@ -44,7 +44,6 @@ const JUEGOS = [
   { id: 'cuordle',        label: 'Cuordle',         url: 'https://jegomei.github.io/Cuardle/' },
 ];
 
-// Paleta de colores de perfil disponibles
 const COLORES = [
   '#1976d2', // azul (default)
   '#e53935', // rojo
@@ -58,8 +57,8 @@ const COLORES = [
 
 // Estado de la app
 let currentFriend = null; // { uid, name }
-let myColor       = COLORES[0]; // se actualiza al cargar perfil
-let selectedColor = COLORES[0]; // color seleccionado en el modal (pendiente de guardar)
+let myColor       = COLORES[0];
+let selectedColor = COLORES[0];
 
 
 // =============================================
@@ -117,9 +116,8 @@ onAuthStateChanged(auth, (user) => {
 });
 
 function mostrarApp(user) {
-  document.getElementById('loginScreen').style.display    = 'none';
-  document.getElementById('appContainer').style.display   = 'block';
-  document.getElementById('userDisplayName').textContent  = user.displayName;
+  document.getElementById('loginScreen').style.display  = 'none';
+  document.getElementById('appContainer').style.display = 'block';
   crearPerfilSiNoExiste(user);
 }
 
@@ -140,7 +138,7 @@ function abrirReto(friendUid, friendName) {
 
   document.getElementById('mainView').style.display       = 'none';
   document.getElementById('challengeView').style.display  = 'block';
-  document.getElementById('challengeTitle').textContent   = `Reto con ${friendName}`;
+  document.getElementById('headerTitle').textContent      = `Reto con ${friendName}`;
 
   const hoy = new Date().toISOString().split('T')[0];
   document.getElementById('todayDateLabel').textContent   = formatFecha(hoy);
@@ -152,6 +150,7 @@ function volverAlMain() {
   currentFriend = null;
   document.getElementById('challengeView').style.display  = 'none';
   document.getElementById('mainView').style.display       = 'block';
+  document.getElementById('headerTitle').textContent      = '';
 }
 
 
@@ -162,7 +161,6 @@ function volverAlMain() {
 async function cargarReto(myUid, friendUid) {
   const hoy = new Date().toISOString().split('T')[0];
 
-  // Cargar resultados + perfil del amigo (para su color) en paralelo
   const [mySnap, friendSnap, friendProfileSnap] = await Promise.all([
     getDoc(doc(db, 'results', `${myUid}_${hoy}`)),
     getDoc(doc(db, 'results', `${friendUid}_${hoy}`)),
@@ -177,7 +175,6 @@ async function cargarReto(myUid, friendUid) {
   await cargarHistorial(myUid, friendUid);
 }
 
-// Renderiza los botones de juego con estado y color dinámico
 function renderJuegosBotones(myData, friendData, friendColor) {
   const container = document.getElementById('juegosBotones');
   container.innerHTML = '';
@@ -190,21 +187,18 @@ function renderJuegosBotones(myData, friendData, friendColor) {
     btn.className = 'juego-btn';
 
     if (myVal === null) {
-      // Sin jugar → amarillo, clickable
       btn.classList.add('juego-btn--unplayed');
       btn.innerHTML = `<span class="juego-btn-name">${juego.label}</span>
                        <span class="juego-btn-status">Toca para jugar →</span>`;
       btn.addEventListener('click', () => abrirJuego(juego.label, juego.url));
 
     } else if (rawFriend === null) {
-      // Yo jugué, amigo pendiente → gris, no clickable
       btn.classList.add('juego-btn--waiting');
       btn.innerHTML = `<span class="juego-btn-name">${juego.label}</span>
                        <span class="juego-btn-status">Tú: ${myVal} · Esperando rival…</span>`;
 
     } else {
-      // Ambos jugaron → color del ganador
-      const iWin       = timeToMs(myVal) <= timeToMs(rawFriend);
+      const iWin        = timeToMs(myVal) <= timeToMs(rawFriend);
       const winnerColor = iWin ? myColor : friendColor;
       btn.classList.add('juego-btn--result');
       btn.style.background = winnerColor;
@@ -217,17 +211,6 @@ function renderJuegosBotones(myData, friendData, friendColor) {
   }
 }
 
-// Devuelve la clase CSS según quién gana (menor tiempo = mejor)
-function clasePuntuacion(myVal, friendVal, jugador) {
-  if (!myVal || !friendVal) return '';
-  const myMs     = timeToMs(myVal);
-  const friendMs = timeToMs(friendVal);
-  if (jugador === 'me')     return myMs     <= friendMs ? 'score-win' : 'score-lose';
-  if (jugador === 'friend') return friendMs <= myMs     ? 'score-win' : 'score-lose';
-  return '';
-}
-
-// Convierte "MM:SS" o "MM:SS.cc" a milisegundos para comparar
 function timeToMs(str) {
   if (!str) return Infinity;
   const m = str.match(/^(\d+):(\d+)(?:\.(\d+))?$/);
@@ -333,7 +316,6 @@ async function crearPerfilSiNoExiste(user) {
       friends:     [],
     });
   } else if (!snap.data().nickname) {
-    // Migración: añadir campos de perfil a usuarios existentes
     await updateDoc(userRef, {
       nickname: snap.data().displayName,
       color:    COLORES[0],
@@ -350,35 +332,40 @@ async function cargarPerfil(uid) {
 
   myColor = data.color || COLORES[0];
 
+  document.getElementById('userDisplayName').textContent  = data.nickname || data.displayName;
   document.getElementById('friendCodeDisplay').textContent = data.friendCode;
-  document.getElementById('userDisplayName').textContent   = data.nickname || data.displayName;
 
   renderAmigos(data.friends || []);
 }
 
 
 // =============================================
-// MODAL — Perfil de usuario
+// PERFIL — Acordeón inline
 // =============================================
 
-function abrirProfileModal() {
-  const user = auth.currentUser;
-  if (!user) return;
+function toggleProfileCard() {
+  const content = document.getElementById('profileContent');
+  const arrow   = document.getElementById('profileArrow');
+  const isOpen  = content.style.display !== 'none';
 
-  getDoc(doc(db, 'users', user.uid)).then(snap => {
-    if (!snap.exists()) return;
-    const data = snap.data();
-
-    document.getElementById('profileNickname').value = data.nickname || data.displayName;
-    selectedColor = data.color || COLORES[0];
-    renderColorSwatches(selectedColor);
-
-    document.getElementById('profileModal').style.display = 'flex';
-  });
-}
-
-function cerrarProfileModal() {
-  document.getElementById('profileModal').style.display = 'none';
+  if (isOpen) {
+    content.style.display = 'none';
+    arrow.classList.remove('open');
+  } else {
+    // Pre-rellenar campos con datos actuales
+    const user = auth.currentUser;
+    if (user) {
+      getDoc(doc(db, 'users', user.uid)).then(snap => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        document.getElementById('profileNickname').value = data.nickname || data.displayName;
+        selectedColor = data.color || COLORES[0];
+        renderColorSwatches(selectedColor);
+      });
+    }
+    content.style.display = 'block';
+    arrow.classList.add('open');
+  }
 }
 
 function renderColorSwatches(colorActual) {
@@ -412,7 +399,11 @@ async function guardarPerfil() {
 
   myColor = selectedColor;
   document.getElementById('userDisplayName').textContent = nickname;
-  cerrarProfileModal();
+
+  // Colapsar tras guardar
+  document.getElementById('profileContent').style.display = 'none';
+  document.getElementById('profileArrow').classList.remove('open');
+
   mostrar('Perfil guardado ✓');
 }
 
@@ -623,7 +614,6 @@ async function guardar(campos) {
   const hoy = new Date().toISOString().split('T')[0];
   await setDoc(doc(db, 'results', `${user.uid}_${hoy}`), campos, { merge: true });
 
-  // Si la vista de reto está abierta, refrescar para revelar resultados
   if (currentFriend) await cargarReto(user.uid, currentFriend.uid);
 }
 
@@ -648,24 +638,23 @@ function mostrar(texto, esError = false) {
 // =============================================
 
 // Login / logout
-document.getElementById('btnGoogle').addEventListener('click', loginConGoogle);
-document.getElementById('btnSignOut').addEventListener('click', cerrarSesion);
+document.getElementById('btnGoogle').addEventListener('click',   loginConGoogle);
+document.getElementById('btnSignOut').addEventListener('click',  cerrarSesion);
 
-// Abrir modal de perfil al hacer clic en el nombre
-document.getElementById('userDisplayName').addEventListener('click', abrirProfileModal);
+// Botón home → volver a vista principal
+document.getElementById('btnHome').addEventListener('click', volverAlMain);
 
-// Modal de perfil
+// Toggle perfil inline
+document.getElementById('profileToggle').addEventListener('click', toggleProfileCard);
+
+// Guardar perfil
 document.getElementById('btnGuardarPerfil').addEventListener('click', guardarPerfil);
-document.getElementById('btnCerrarPerfil').addEventListener('click',  cerrarProfileModal);
-document.getElementById('profileModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('profileModal')) cerrarProfileModal();
-});
 
 // Cerrar juego
 document.getElementById('closeBtn').addEventListener('click', cerrarJuego);
 
 // Leer portapapeles (en ambas vistas)
-document.getElementById('btnLeer').addEventListener('click',    leerResultado);
+document.getElementById('btnLeer').addEventListener('click',     leerResultado);
 document.getElementById('btnLeerReto').addEventListener('click', leerResultado);
 
 // Copiar código de amigo
@@ -685,9 +674,6 @@ document.getElementById('friendsList').addEventListener('click', (e) => {
   if (!btn) return;
   abrirReto(btn.dataset.uid, btn.dataset.name);
 });
-
-// Volver a la vista principal
-document.getElementById('btnBack').addEventListener('click', volverAlMain);
 
 // ⚠️ DEV ONLY
 document.getElementById('btnCrearFake').addEventListener('click', crearAmigoFicticio);

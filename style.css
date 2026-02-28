@@ -62,17 +62,7 @@ body {
   margin: 0;
 }
 
-/* Variante outline (cabecera) */
-.btn-outline {
-  background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  color: white;
-}
-.btn-outline:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* Variante outline (modal perfil) */
+/* Variante outline (modal / perfil inline) */
 .btn-outline-modal {
   background: transparent;
   border: 2px solid #e0e0e0;
@@ -132,40 +122,52 @@ body {
 }
 
 /* =============================================
-   CABECERA DE USUARIO (app autenticada)
+   CABECERA — botón home + título contextual
    ============================================= */
 #appHeader {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 12px;
-  padding: 10px 20px;
+  padding: 0 16px;
+  height: 48px;
   background: #1976d2;
   color: white;
 }
 
-#userDisplayName {
-  font-size: 14px;
-  font-weight: 600;
+.btn-home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
   transition: background 0.15s;
+  flex-shrink: 0;
 }
 
-#userDisplayName:hover {
-  background: rgba(255, 255, 255, 0.2);
+.btn-home:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+#headerTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
 }
 
 /* =============================================
    MAIN — CONTENIDO DE LA APP
    ============================================= */
 main {
-  padding: 30px 20px;
+  padding: 24px 20px;
 }
 
 main h1 {
-  margin: 0 0 20px;
+  margin: 0 0 16px;
 }
 
 /* =============================================
@@ -191,6 +193,42 @@ main h1 {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #888;
+  display: block;
+}
+
+/* ─── Perfil colapsable ────────────────────── */
+#profileToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
+}
+
+#userDisplayName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+}
+
+#profileArrow {
+  font-size: 12px;
+  color: #aaa;
+  transition: transform 0.2s;
+}
+
+#profileArrow.open {
+  transform: rotate(180deg);
+}
+
+.profile-divider {
+  border-top: 1px solid #f0f0f0;
+  margin: 14px 0;
+}
+
+.profile-field {
+  margin-bottom: 14px;
 }
 
 /* Código de amigo */
@@ -198,21 +236,19 @@ main h1 {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 8px;
 }
 
 #friendCodeDisplay {
-  font-size: 26px;
-  letter-spacing: 6px;
+  font-size: 22px;
+  letter-spacing: 5px;
   font-family: 'Courier New', monospace;
   color: #1976d2;
 }
 
-/* Formulario añadir amigo */
+/* Formulario añadir amigo / guardar nickname */
 .input-row {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
 }
 
 .input-row input {
@@ -221,11 +257,15 @@ main h1 {
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#friendCodeInput {
   font-family: 'Courier New', monospace;
   text-transform: uppercase;
   letter-spacing: 3px;
-  outline: none;
-  transition: border-color 0.15s;
 }
 
 .input-row input:focus {
@@ -240,6 +280,32 @@ main h1 {
 
 .form-msg.error   { color: #e53935; }
 .form-msg.success { color: #388e3c; }
+
+/* Paleta de colores */
+#colorSwatches {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.color-swatch:hover {
+  transform: scale(1.12);
+}
+
+.color-swatch.selected {
+  outline: 3px solid #333;
+  outline-offset: 3px;
+}
 
 /* Lista de amigos */
 #friendsList {
@@ -307,26 +373,8 @@ iframe {
 }
 
 /* =============================================
-   VISTA DE RETO — NAVEGACIÓN
+   VISTA DE RETO
    ============================================= */
-#challengeNav {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 20px;
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-#challengeTitle {
-  font-size: 17px;
-  font-weight: 600;
-  color: #222;
-}
-
 #challengeContent {
   max-width: 480px;
   margin: 0 auto;
@@ -434,98 +482,6 @@ iframe {
 .pill.win  { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
 .pill.lose { background: #ffebee; color: #c62828; }
 .pill.tie  { background: #fff3e0; color: #e65100; }
-
-/* =============================================
-   MODAL DE PERFIL
-   ============================================= */
-#profileModal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 200;
-}
-
-#profileCard {
-  background: white;
-  border-radius: 20px;
-  padding: 32px 28px 24px;
-  width: 90%;
-  max-width: 340px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-  text-align: left;
-}
-
-#profileCard h2 {
-  margin: 0 0 24px;
-  font-size: 20px;
-  color: #1976d2;
-  text-align: center;
-}
-
-.profile-field {
-  margin-bottom: 20px;
-}
-
-.profile-field label {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #888;
-  margin-bottom: 8px;
-}
-
-.profile-field input {
-  width: 100%;
-  padding: 10px 14px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 15px;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.profile-field input:focus {
-  border-color: #1976d2;
-}
-
-/* Paleta de colores */
-#colorSwatches {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.color-swatch {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-
-.color-swatch:hover {
-  transform: scale(1.12);
-}
-
-.color-swatch.selected {
-  outline: 3px solid #333;
-  outline-offset: 3px;
-}
-
-/* Botones del modal */
-.profile-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  margin-top: 4px;
-}
 
 /* =============================================
    TOAST GLOBAL
