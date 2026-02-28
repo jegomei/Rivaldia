@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agregador retos diarios</title>
+
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    padding: 30px;
+    background: #f0f0f0;
+    text-align: center;
+  }
+
+  .btn {
+    display: block;
+    width: 280px;
+    margin: 8px auto;
+    padding: 14px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background: #1976d2;
+    color: white;
+    cursor: pointer;
+  }
+
+  .btn:hover { background: #1565c0; }
+
+  #gameContainer {
+    margin: 30px auto;
+    width: 95%;
+    max-width: 1000px;
+    height: 600px;
+    border: 4px solid #333;
+    border-radius: 16px;
+    overflow: hidden;
+    display: none;
+    background: white;
+  }
+
+  #topBar {
+    height: 50px;
+    background: #222;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+  }
+
+  #closeBtn {
+    background: #e53935;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+  }
+
+  iframe {
+    width: 100%;
+    height: calc(100% - 50px);
+    border: none;
+  }
+
+  #resultadoBox {
+    margin-top: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    display: inline-block;
+    min-width: 300px;
+    text-align: left;
+  }
+
+</style>
+</head>
+<body>
+
+<h1>Agregador de retos diarios</h1>
+
+<button class="btn" onclick="abrirJuego('Sumplete','https://sumplete.com/')">Sumplete</button>
+<button class="btn" onclick="abrirJuego('Shikaku','https://shikakuofthe.day/')">Shikaku</button>
+<button class="btn" onclick="abrirJuego('Cinco','https://puzzlepass.io/en/cinco/cinco-medium/?playlist=numbers')">Cinco</button>
+<button class="btn" onclick="abrirJuego('Cuordle','https://jegomei.github.io/Cuardle/')">Cuordle</button>
+
+<div id="gameContainer">
+  <div id="topBar">
+    <span id="gameTitle">Juego</span>
+    <button id="closeBtn" onclick="cerrarJuego()">Cerrar</button>
+  </div>
+  <iframe id="gameFrame"></iframe>
+</div>
+
+<button class="btn" style="background:#4CAF50;" onclick="leerResultado()">Leer resultado del portapapeles</button>
+
+<div id="resultadoBox">
+  <strong>Último resultado detectado:</strong>
+  <div id="resultado">---</div>
+</div>
+
+<script>
+function abrirJuego(nombre, url) {
+  document.getElementById("gameTitle").textContent = nombre;
+  document.getElementById("gameFrame").src = url;
+  document.getElementById("gameContainer").style.display = "block";
+}
+
+function cerrarJuego() {
+  document.getElementById("gameFrame").src = "";
+  document.getElementById("gameContainer").style.display = "none";
+}
+
+async function leerResultado() {
+  try {
+    const texto = await navigator.clipboard.readText();
+    const hoy = new Date().toISOString().split("T")[0];
+
+    // ---------- SUMPLETE ----------
+    if (texto.includes("#sumplete")) {
+      const match = texto.match(/in\s+(\d{2}:\d{2}\.\d{2})/);
+      if (match) {
+        guardar("sumplete", hoy, { tiempo: match[1] });
+        mostrar(`Sumplete (${hoy}) → ${match[1]}`);
+        return;
+      }
+    }
+
+    // ---------- SHIKAKU ----------
+    if (texto.includes("#ShikakuOfTheDay")) {
+
+      const easyMatch = texto.match(/#EASY\d+\s+⏱️\s+(\d{2}:\d{2}\.\d{2})/);
+      const mediumMatch = texto.match(/#MEDIUM\d+\s+⏱️\s+(\d{2}:\d{2}\.\d{2})/);
+
+      let resultado = {};
+
+      if (easyMatch) resultado.easy = easyMatch[1];
+      if (mediumMatch) resultado.medium = mediumMatch[1];
+
+      guardar("shikaku", hoy, resultado);
+
+      mostrar(`Shikaku (${hoy})
+EASY → ${resultado.easy || "-"}
+MEDIUM → ${resultado.medium || "-"}`);
+
+      return;
+    }
+
+    // ---------- CINCO ----------
+    if (texto.includes("Cinco of the day")) {
+      const match = texto.match(/took me (\d{2}:\d{2})/);
+      if (match) {
+        guardar("cinco", hoy, { tiempo: match[1] });
+        mostrar(`Cinco (${hoy}) → ${match[1]}`);
+        return;
+      }
+    }
+
+    mostrar("No se reconoce el formato del texto copiado.");
+
+  } catch (err) {
+    mostrar("Error al leer el portapapeles (requiere HTTPS).");
+  }
+}
+
+function guardar(juego, fecha, datos) {
+  localStorage.setItem(juego + "_" + fecha, JSON.stringify(datos));
+}
+
+function mostrar(texto) {
+  document.getElementById("resultado").textContent = texto;
+}
+</script>
+
+</body>
+</html>
