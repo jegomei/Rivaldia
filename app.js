@@ -16,6 +16,7 @@ import {
   getFirestore,
   doc, setDoc, getDoc, updateDoc, arrayUnion,
   collection, query, where, getDocs,
+  orderBy, startAt, endAt, documentId,
 } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -74,9 +75,11 @@ const COLORES = [
 ];
 
 // Estado de la app
-let currentFriend = null; // { uid, name }
-let myColor       = COLORES[0];
-let selectedColor = COLORES[0];
+let currentFriend      = null;        // { uid, name }
+let currentFriendColor = COLORES[0];  // color del amigo actual (cargado en cargarReto)
+let myColor            = COLORES[0];
+let myNickname         = '';          // nickname propio (para ordenación alfabética en stats)
+let selectedColor      = COLORES[0];
 
 
 // =============================================
@@ -175,6 +178,22 @@ function volverAlMain(updateHash = true) {
   if (updateHash) history.replaceState(null, '', location.pathname);
 }
 
+function abrirStats(year, month) {
+  document.getElementById('challengeView').style.display = 'none';
+  document.getElementById('statsView').style.display     = 'block';
+  const NOMBRES_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                       'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('statsMonthLabel').textContent  = `${NOMBRES_MES[month - 1]} ${year}`;
+  document.getElementById('headerTitle').textContent      = `Estadísticas con ${currentFriend.name}`;
+  cargarStats(auth.currentUser.uid, currentFriend.uid, year, month);
+}
+
+function volverAlChallenge() {
+  document.getElementById('statsView').style.display      = 'none';
+  document.getElementById('challengeView').style.display  = 'block';
+  document.getElementById('headerTitle').textContent      = `Reto con ${currentFriend.name}`;
+}
+
 // Navega al reto indicado en el hash de la URL (#reto/{uid})
 async function navegarDesdeHash() {
   const hash = location.hash;                   // '#reto/abc123...'
@@ -204,9 +223,11 @@ async function cargarReto(myUid, friendUid) {
   const myData      = mySnap.exists()            ? mySnap.data()            : {};
   const friendData  = friendSnap.exists()        ? friendSnap.data()        : {};
   const friendColor = friendProfileSnap.exists() ? (friendProfileSnap.data().color || COLORES[0]) : COLORES[0];
+  currentFriendColor = friendColor;
 
   renderJuegosBotones(myData, friendData, friendColor);
   await cargarHistorial(myUid, friendUid, friendColor);
+  cargarMeses(myUid, friendUid); // sin await: carga en paralelo con la UI ya visible
 }
 
 function renderJuegosBotones(myData, friendData, friendColor) {
@@ -346,6 +367,300 @@ function ultimosDias(n) {
   );
 }
 
+// Devuelve un array de strings 'YYYY-MM-DD' para todos los días del mes
+function obtenerDiasDelMes(year, month) {
+  const numDias = new Date(year, month, 0).getDate(); // día 0 del mes siguiente
+  const mm = String(month).padStart(2, '0');
+  return Array.from({ length: numDias }, (_, i) => {
+    const dd = String(i + 1).padStart(2, '0');
+    return `${year}-${mm}-${dd}`;
+  });
+}
+
+// Color de un segmento del gráfico circular (mismo criterio que colorCuadrado)
+function colorSegmento(myVal, friendVal, friendColor) {
+  const myMs = timeToMs(myVal);
+  const frMs = timeToMs(friendVal);
+  if (myMs === Infinity && frMs === Infinity) return '#e0e0e0';
+  if (myMs === Infinity) return friendColor;
+  if (frMs === Infinity) return myColor;
+  if (myMs === frMs)     return '#e0e0e0';
+  return myMs < frMs ? myColor : friendColor;
+}
+
+// CSS conic-gradient agrupando victorias: primero el jugador A (alfabético), luego B, luego gris
+function crearConicGradient(myData, friendData, friendColor) {
+  // Contar victorias de cada jugador
+  let myWins = 0, friendWins = 0;
+  for (const juego of JUEGOS) {
+    const c = colorSegmento(myData?.[juego.id] ?? null, friendData?.[juego.id] ?? null, friendColor);
+    if (c === myColor)     myWins++;
+    else if (c === friendColor) friendWins++;
+  }
+  const grays = JUEGOS.length - myWins - friendWins;
+
+  // El jugador alfabéticamente primero ocupa el primer arco (consistencia entre ambas vistas)
+  const myFirst = myNickname.localeCompare(currentFriend.name, 'es') <= 0;
+
+  const pct  = 100 / JUEGOS.length; // 20% por juego
+  const stops = [];
+  let pos = 0;
+
+  const addArc = (color, count) => {
+    if (count === 0) return;
+    const end = pos + count * pct;
+    stops.push(`${color} ${pos}% ${end}%`);
+    pos = end;
+  };
+
+  if (myFirst) {
+    addArc(myColor,     myWins);
+    addArc(friendColor, friendWins);
+  } else {
+    addArc(friendColor, friendWins);
+    addArc(myColor,     myWins);
+  }
+  addArc('#e0e0e0', grays);
+
+  return `conic-gradient(${stops.join(', ')})`;
+}
+
+async function cargarStats(myUid, friendUid, year, month) {
+  const calGrid = document.getElementById('calGrid');
+  calGrid.innerHTML = '<p class="empty-msg">Cargando…</p>';
+
+  const dias = obtenerDiasDelMes(year, month);
+  const fetches = dias.map(fecha => Promise.all([
+    getDoc(doc(db, 'results', `${myUid}_${fecha}`)),
+    getDoc(doc(db, 'results', `${friendUid}_${fecha}`)),
+  ]));
+  const resultados = await Promise.all(fetches);
+
+  const dataByDay = {};
+  dias.forEach((fecha, i) => {
+    const [mySnap, friendSnap] = resultados[i];
+    const dayNum = parseInt(fecha.split('-')[2]);
+    dataByDay[dayNum] = {
+      myData:     mySnap.exists()     ? mySnap.data()     : null,
+      friendData: friendSnap.exists() ? friendSnap.data() : null,
+    };
+  });
+
+  renderCalendario(year, month, dataByDay);
+}
+
+function renderCalendario(year, month, dataByDay) {
+  const calGrid = document.getElementById('calGrid');
+  calGrid.innerHTML = '';
+
+  const numDias   = new Date(year, month, 0).getDate();
+  const primerDow = new Date(year, month - 1, 1).getDay(); // 0=Dom … 6=Sáb
+  // Convertir a semana con inicio lunes: Lun=0 … Dom=6
+  const offsetLunes = (primerDow === 0) ? 6 : primerDow - 1;
+
+  // Celdas vacías antes del primer día
+  for (let i = 0; i < offsetLunes; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-day';
+    calGrid.appendChild(empty);
+  }
+
+  // Días del mes
+  for (let d = 1; d <= numDias; d++) {
+    const { myData, friendData } = dataByDay[d];
+
+    const cell   = document.createElement('div');
+    cell.className = 'cal-day';
+
+    const circle = document.createElement('div');
+    circle.className = 'cal-day-circle';
+    if (myData || friendData) {
+      circle.style.background = crearConicGradient(myData, friendData, currentFriendColor);
+    }
+
+    const num = document.createElement('span');
+    num.className   = 'cal-day-num';
+    num.textContent = d;
+
+    cell.appendChild(circle);
+    cell.appendChild(num);
+    calGrid.appendChild(cell);
+  }
+
+  // Celdas vacías al final para completar la última fila
+  const total     = offsetLunes + numDias;
+  const remainder = (7 - (total % 7)) % 7;
+  for (let i = 0; i < remainder; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-day';
+    calGrid.appendChild(empty);
+  }
+
+  renderStatCards(dataByDay);
+}
+
+function renderStatCards(dataByDay) {
+  const container = document.getElementById('statCards');
+  container.innerHTML = '';
+
+  const myFirst      = myNickname.localeCompare(currentFriend.name, 'es') <= 0;
+  const playerAName  = myFirst ? myNickname         : currentFriend.name;
+  const playerAColor = myFirst ? myColor             : currentFriendColor;
+  const playerBName  = myFirst ? currentFriend.name  : myNickname;
+  const playerBColor = myFirst ? currentFriendColor  : myColor;
+
+  for (const juego of JUEGOS) {
+    // Contar solo días donde ambos jugaron ese juego
+    let aWins = 0, bWins = 0, jTotal = 0;
+    for (const { myData, friendData } of Object.values(dataByDay)) {
+      const myVal     = myData?.[juego.id]     ?? null;
+      const friendVal = friendData?.[juego.id] ?? null;
+      if (myVal === null || friendVal === null) continue;
+      jTotal++;
+      const myMs = timeToMs(myVal), frMs = timeToMs(friendVal);
+      if (myMs < frMs)      { myFirst ? aWins++ : bWins++; }
+      else if (frMs < myMs) { myFirst ? bWins++ : aWins++; }
+      // Empate exacto de tiempo: cuenta como partida pero no como victoria
+    }
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    // Cabecera: [% ganador izq]  [nombre juego centrado]  [% ganador der]
+    const header     = document.createElement('div');
+    header.className = 'stat-game-header';
+
+    const cornerLeft  = document.createElement('span');
+    cornerLeft.className = 'stat-pct-corner';
+
+    const gameLabel = document.createElement('span');
+    gameLabel.className   = 'card-label';
+    gameLabel.textContent = juego.label;
+
+    const cornerRight = document.createElement('span');
+    cornerRight.className = 'stat-pct-corner stat-pct-corner-right';
+
+    header.appendChild(cornerLeft);
+    header.appendChild(gameLabel);
+    header.appendChild(cornerRight);
+    card.appendChild(header);
+
+    const row = document.createElement('div');
+    row.className = 'stat-row';
+
+    const playerAEl = document.createElement('div');
+    playerAEl.className = 'stat-player';
+    const playerBEl = document.createElement('div');
+    playerBEl.className = 'stat-player stat-player-right';
+
+    const meter    = document.createElement('div');
+    meter.className = 'stat-meter';
+    const sideLeft  = document.createElement('div');
+    sideLeft.className = 'stat-side stat-side-left';
+    const divider   = document.createElement('div');
+    divider.className = 'stat-divider';
+    const sideRight = document.createElement('div');
+    sideRight.className = 'stat-side stat-side-right';
+
+    if (jTotal > 0 && aWins === bWins) {
+      const empLabel = document.createElement('span');
+      empLabel.className   = 'stat-empate-label';
+      empLabel.textContent = 'empate';
+      divider.appendChild(empLabel);
+    } else if (aWins !== bWins) {
+      const winner        = aWins > bWins ? 'a' : 'b';
+      const winnerWins    = winner === 'a' ? aWins  : bWins;
+      const winnerColor   = winner === 'a' ? playerAColor : playerBColor;
+      const decisiveGames = aWins + bWins;
+      const pct           = winnerWins / decisiveGames;
+      const numSquares    = Math.min(5, Math.ceil((pct - 0.5) * 10));
+      const targetSide    = winner === 'a' ? sideLeft : sideRight;
+      const targetCorner  = winner === 'a' ? cornerLeft : cornerRight;
+
+      // Porcentaje en la esquina del ganador, misma línea que el nombre del juego
+      targetCorner.style.color = winnerColor;
+      targetCorner.textContent = Math.round(pct * 100) + '%';
+
+      // Borde de la tarjeta del color del ganador
+      card.style.border = `2px solid ${winnerColor}`;
+
+      for (let i = 0; i < numSquares; i++) {
+        const sq = document.createElement('div');
+        sq.className        = 'history-square';
+        sq.style.background = winnerColor;
+        targetSide.appendChild(sq);
+      }
+    }
+    // Si jTotal === 0: barra sola, sin texto ni cuadros
+
+    const bar = document.createElement('div');
+    bar.className = 'stat-bar';
+    divider.appendChild(bar);
+
+    const nameAEl = document.createElement('span');
+    nameAEl.className   = 'stat-name';
+    nameAEl.textContent = playerAName;
+    playerAEl.appendChild(nameAEl);
+
+    const nameBEl = document.createElement('span');
+    nameBEl.className   = 'stat-name';
+    nameBEl.textContent = playerBName;
+    playerBEl.appendChild(nameBEl);
+
+    meter.appendChild(sideLeft);
+    meter.appendChild(divider);
+    meter.appendChild(sideRight);
+
+    row.appendChild(playerAEl);
+    row.appendChild(meter);
+    row.appendChild(playerBEl);
+    card.appendChild(row);
+    container.appendChild(card);
+  }
+}
+
+async function cargarMeses(myUid, friendUid) {
+  const lista = document.getElementById('mesesList');
+  lista.innerHTML = '<p class="empty-msg">Cargando…</p>';
+
+  // Los documentos tienen ID = '{uid}_{YYYY-MM-DD}'; filtramos por rango de ID
+  const queryPorUid = (uid) => query(
+    collection(db, 'results'),
+    orderBy(documentId()),
+    startAt(uid + '_'),
+    endAt(uid + '_\uf8ff'),
+  );
+  const [myDocs, friendDocs] = await Promise.all([
+    getDocs(queryPorUid(myUid)),
+    getDocs(queryPorUid(friendUid)),
+  ]);
+
+  const mesesSet = new Set();
+  for (const snap of [...myDocs.docs, ...friendDocs.docs]) {
+    // El ID siempre es '{uid}_{YYYY-MM-DD}'; tomamos todo lo que hay tras el primer '_'
+    const underscoreIdx = snap.id.indexOf('_');
+    const date = underscoreIdx !== -1 ? snap.id.slice(underscoreIdx + 1) : null;
+    if (date && date.length >= 7) mesesSet.add(date.slice(0, 7));
+  }
+
+  if (mesesSet.size === 0) {
+    lista.innerHTML = '<p class="empty-msg">Sin datos aún.</p>';
+    return;
+  }
+
+  const NOMBRES_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                       'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  lista.innerHTML = '';
+  for (const ym of [...mesesSet].sort().reverse()) {
+    const [year, month] = ym.split('-').map(Number);
+    const item = document.createElement('div');
+    item.className = 'month-item';
+    item.innerHTML = `<span class="month-name">${NOMBRES_MES[month - 1]} ${year}</span>
+      <button class="btn btn-sm" data-year="${year}" data-month="${month}">Ver estadísticas</button>`;
+    lista.appendChild(item);
+  }
+}
+
 function formatFecha(dateStr) {
   const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   const [, mes, dia] = dateStr.split('-');
@@ -387,7 +702,8 @@ async function cargarPerfil(uid) {
   if (!snap.exists()) return;
   const data = snap.data();
 
-  myColor = data.color || COLORES[0];
+  myColor    = data.color || COLORES[0];
+  myNickname = data.nickname || data.displayName || '';
   aplicarColor(myColor);
 
   document.getElementById('userDisplayName').textContent  = data.nickname || data.displayName;
@@ -715,8 +1031,14 @@ function mostrar(texto, esError = false) {
 document.getElementById('btnGoogle').addEventListener('click',   loginConGoogle);
 document.getElementById('btnSignOut').addEventListener('click',  cerrarSesion);
 
-// Botón home → volver a vista principal
-document.getElementById('btnHome').addEventListener('click', volverAlMain);
+// Botón home → volver a challenge si estamos en stats, si no al main
+document.getElementById('btnHome').addEventListener('click', () => {
+  if (document.getElementById('statsView').style.display !== 'none') {
+    volverAlChallenge();
+  } else {
+    volverAlMain();
+  }
+});
 
 // Toggle perfil inline
 document.getElementById('profileToggle').addEventListener('click', toggleProfileCard);
@@ -735,6 +1057,13 @@ document.getElementById('btnCopyCode').addEventListener('click', copiarCodigo);
 
 // Añadir amigo
 document.getElementById('btnAddFriend').addEventListener('click', añadirAmigo);
+
+// Ver estadísticas de un mes (delegación sobre lista dinámica)
+document.getElementById('mesesList').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-year]');
+  if (!btn) return;
+  abrirStats(parseInt(btn.dataset.year), parseInt(btn.dataset.month));
+});
 
 // Auto-uppercase + solo alfanumérico en el input del código
 document.getElementById('friendCodeInput').addEventListener('input', (e) => {

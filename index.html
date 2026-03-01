@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Retos Diarios</title>
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 
@@ -152,8 +152,32 @@
           </div>
         </div>
 
+        <!-- Meses -->
+        <div class="card">
+          <span class="card-label">Meses</span>
+          <div id="mesesList">
+            <p class="empty-msg">Cargando...</p>
+          </div>
+        </div>
+
       </div>
     </div><!-- /#challengeView -->
+
+
+    <!-- ══ VISTA DE ESTADÍSTICAS ══════════════ -->
+    <div id="statsView" style="display:none">
+      <div id="statsContent">
+        <div class="card">
+          <span class="card-label" id="statsMonthLabel">Febrero 2026</span>
+          <div class="cal-weekdays">
+            <span>L</span><span>M</span><span>X</span>
+            <span>J</span><span>V</span><span>S</span><span>D</span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+        <div id="statCards"></div>
+      </div>
+    </div><!-- /#statsView -->
 
 
     <!-- ══ IFRAME DE JUEGOS (overlay fijo) ═══ -->
@@ -172,7 +196,7 @@
   <div id="toast"></div>
 
 
-  <script type="module" src="app.js?v=9"></script>
+  <script type="module" src="app.js?v=10"></script>
 
   <!-- Bloquea zoom en iOS Safari (ignora user-scalable=no desde iOS 10) -->
   <script>
