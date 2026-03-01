@@ -8,9 +8,9 @@
 
 ## 📸 Capturas
 
-![Pantalla principal](screenshots/rivaldia1.png)
-![Vista de reto](screenshots/rivaldia2.png)
-![Estadísticas mensuales](screenshots/rivaldia3.png)
+![Pantalla principal](screenshots/rivaldia1.PNG)
+![Vista de reto](screenshots/rivaldia2.PNG)
+![Estadísticas mensuales](screenshots/rivaldia3.PNG)
 
 ---
 
