@@ -45,14 +45,32 @@ const JUEGOS = [
 ];
 
 const COLORES = [
-  '#1976d2', // azul (default)
+  // Rojos & naranjas
+  '#c62828', // rojo oscuro
   '#e53935', // rojo
-  '#2e7d32', // verde
-  '#7b1fa2', // morado
-  '#e65100', // naranja
+  '#bf360c', // terracota
+  '#e65100', // naranja quemado
+  // Verdes
+  '#1b5e20', // verde pino
+  '#2e7d32', // verde bosque
+  '#33691e', // verde oliva
+  // Teals
+  '#006064', // cian profundo
+  '#00796b', // verde jade
+  // Azules
+  '#01579b', // azul noche
+  '#1565c0', // azul marino
+  '#1976d2', // azul (default)
+  '#0288d1', // azul cielo
+  // Morados & rosas
+  '#4527a0', // púrpura oscuro
+  '#512da8', // índigo
+  '#7b1fa2', // violeta
+  '#880e4f', // frambuesa
   '#c2185b', // rosa
-  '#00796b', // teal
-  '#5d4037', // marrón
+  // Neutros
+  '#4e342e', // marrón chocolate
+  '#37474f', // gris pizarra
 ];
 
 // Estado de la app
@@ -118,6 +136,7 @@ onAuthStateChanged(auth, (user) => {
 function mostrarApp(user) {
   document.getElementById('loginScreen').style.display  = 'none';
   document.getElementById('appContainer').style.display = 'block';
+  document.getElementById('headerTitle').textContent    = 'Retos Diarios';
   crearPerfilSiNoExiste(user);
 }
 
@@ -152,7 +171,7 @@ function volverAlMain(updateHash = true) {
   currentFriend = null;
   document.getElementById('challengeView').style.display  = 'none';
   document.getElementById('mainView').style.display       = 'block';
-  document.getElementById('headerTitle').textContent      = '';
+  document.getElementById('headerTitle').textContent      = 'Retos Diarios';
   if (updateHash) history.replaceState(null, '', location.pathname);
 }
 
@@ -369,6 +388,7 @@ async function cargarPerfil(uid) {
   const data = snap.data();
 
   myColor = data.color || COLORES[0];
+  aplicarColor(myColor);
 
   document.getElementById('userDisplayName').textContent  = data.nickname || data.displayName;
   document.getElementById('friendCodeDisplay').textContent = data.friendCode;
@@ -384,11 +404,13 @@ async function cargarPerfil(uid) {
 function toggleProfileCard() {
   const content = document.getElementById('profileContent');
   const arrow   = document.getElementById('profileArrow');
+  const toggle  = document.getElementById('profileToggle');
   const isOpen  = content.style.display !== 'none';
 
   if (isOpen) {
     content.style.display = 'none';
     arrow.classList.remove('open');
+    toggle.classList.remove('expanded');
   } else {
     // Pre-rellenar campos con datos actuales
     const user = auth.currentUser;
@@ -403,6 +425,7 @@ function toggleProfileCard() {
     }
     content.style.display = 'block';
     arrow.classList.add('open');
+    toggle.classList.add('expanded');
   }
 }
 
@@ -437,10 +460,12 @@ async function guardarPerfil() {
 
   myColor = selectedColor;
   document.getElementById('userDisplayName').textContent = nickname;
+  aplicarColor(selectedColor);
 
   // Colapsar tras guardar
   document.getElementById('profileContent').style.display = 'none';
   document.getElementById('profileArrow').classList.remove('open');
+  document.getElementById('profileToggle').classList.remove('expanded');
 
   mostrar('Perfil guardado ✓');
 }
@@ -469,7 +494,7 @@ async function renderAmigos(amigos) {
     item.className = 'friend-item';
     item.innerHTML = `
       <span class="friend-name">${friendName}</span>
-      <button class="btn btn-sm btn-success retar-btn" data-uid="${uid}" data-name="${friendName}">
+      <button class="btn btn-sm retar-btn" data-uid="${uid}" data-name="${friendName}">
         Retar
       </button>`;
     lista.appendChild(item);
@@ -638,6 +663,36 @@ async function guardar(campos) {
 
 
 // =============================================
+// HELPERS UI — Color del usuario
+// =============================================
+
+// Devuelve una versión ~18% más oscura de un color hex (para hover)
+function darken(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const f = (x) => Math.round(x * 0.82).toString(16).padStart(2, '0');
+  return `#${f(r)}${f(g)}${f(b)}`;
+}
+
+// Aplica el color elegido por el usuario a toda la UI:
+// custom properties CSS (botones, topbar) + toggle del perfil
+function aplicarColor(color) {
+  const root = document.documentElement;
+  root.style.setProperty('--user-color',       color);
+  root.style.setProperty('--user-color-hover', darken(color));
+
+  // Toggle del perfil (usa inline style, fuera del flujo de las CSS vars)
+  const toggle = document.getElementById('profileToggle');
+  if (toggle) {
+    toggle.style.background = color;
+    document.getElementById('userDisplayName').style.color = 'white';
+    document.getElementById('profileArrow').style.color    = 'rgba(255,255,255,0.7)';
+  }
+}
+
+
+// =============================================
 // HELPERS UI — Toast
 // =============================================
 
@@ -672,8 +727,7 @@ document.getElementById('btnGuardarPerfil').addEventListener('click', guardarPer
 // Cerrar juego
 document.getElementById('closeBtn').addEventListener('click', cerrarJuego);
 
-// Leer portapapeles (en ambas vistas)
-document.getElementById('btnLeer').addEventListener('click',     leerResultado);
+// Leer portapapeles (vista de reto)
 document.getElementById('btnLeerReto').addEventListener('click', leerResultado);
 
 // Copiar código de amigo

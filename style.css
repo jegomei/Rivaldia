@@ -1,4 +1,13 @@
 /* =============================================
+   COLOR DE USUARIO — custom properties
+   Actualizadas por JS al cargar/guardar perfil
+   ============================================= */
+:root {
+  --user-color:       #1976d2;
+  --user-color-hover: #1565c0;
+}
+
+/* =============================================
    GLOBALES
    ============================================= */
 *, *::before, *::after {
@@ -24,13 +33,13 @@ body {
   font-family: inherit;
   border: none;
   border-radius: 10px;
-  background: #1976d2;
+  background: var(--user-color);
   color: white;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 
-.btn:hover { background: #1565c0; }
+.btn:hover { background: var(--user-color-hover); }
 
 /* Variante verde — portapapeles */
 .btn-success       { background: #4caf50; }
@@ -65,11 +74,11 @@ body {
 /* Variante outline (modal / perfil inline) */
 .btn-outline-modal {
   background: transparent;
-  border: 2px solid #e0e0e0;
-  color: #555;
+  border: 2px solid var(--user-color);
+  color: var(--user-color);
 }
 .btn-outline-modal:hover {
-  background: #f5f5f5;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 /* Botón leer portapapeles dentro del card del reto */
@@ -130,8 +139,9 @@ body {
   gap: 12px;
   padding: 0 16px;
   height: 48px;
-  background: #1976d2;
+  background: var(--user-color);
   color: white;
+  transition: background 0.3s;
 }
 
 .btn-home {
@@ -197,24 +207,40 @@ main h1 {
 }
 
 /* ─── Perfil colapsable ────────────────────── */
+
+/* El fondo de color del toggle se extiende hasta los bordes de la card */
+#profileCard {
+  overflow: hidden;
+}
+
 #profileToggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
-  padding: 2px 0;
+  /* Anula el padding de .card para extenderse hasta sus bordes */
+  margin: -16px -20px;
+  padding: 14px 20px;
+  transition: background 0.2s;
+}
+
+#profileToggle:hover {
+  filter: brightness(0.93);
+}
+
+/* Cuando está abierto, sólo ocupa la cabecera (sin margen inferior negativo) */
+#profileToggle.expanded {
+  margin-bottom: 0;
 }
 
 #userDisplayName {
   font-size: 16px;
   font-weight: 600;
-  color: #222;
 }
 
 #profileArrow {
   font-size: 12px;
-  color: #aaa;
   transition: transform 0.2s;
 }
 
@@ -242,7 +268,7 @@ main h1 {
   font-size: 22px;
   letter-spacing: 5px;
   font-family: 'Courier New', monospace;
-  color: #1976d2;
+  color: var(--user-color);
 }
 
 /* Formulario añadir amigo / guardar nickname */
@@ -494,7 +520,7 @@ iframe {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%) translateY(80px);
-  background: #2e7d32;
+  background: var(--user-color);
   color: white;
   padding: 12px 22px;
   border-radius: 10px;
