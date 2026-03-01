@@ -998,6 +998,9 @@ function aplicarColor(color) {
   root.style.setProperty('--user-color',       color);
   root.style.setProperty('--user-color-hover', darken(color));
 
+  // Sincroniza el color del status bar (Android/Chrome PWA y Safari theme)
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', color);
+
   // Toggle del perfil (usa inline style, fuera del flujo de las CSS vars)
   const toggle = document.getElementById('profileToggle');
   if (toggle) {
