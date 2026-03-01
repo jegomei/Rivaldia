@@ -37,7 +37,7 @@ const db = getFirestore(firebaseApp);
 // CONFIG — Juegos (fuente de verdad única)
 // =============================================
 const JUEGOS = [
-  { id: 'sumplete',       label: 'Sumplete',       url: 'https://sumplete.com/' },
+  { id: 'sumplete',       label: 'Sumplete',       url: 'https://sumplete.com/daily' },
   { id: 'shikaku_easy',   label: 'Shikaku Easy',   url: 'https://shikakuofthe.day/' },
   { id: 'shikaku_medium', label: 'Shikaku Medium',  url: 'https://shikakuofthe.day/' },
   { id: 'cinco',          label: 'Cinco',           url: 'https://embed.puzzlepass.io/eyJwbGF5ZXJJZCI6IktkR2ZjZ0xURElBSVY5cE42MUpuIiwidXNlcklkIjoiYWx2YXJvaXJlZ3VpOTJAZ21haWwuY29tIiwibGFuZ3VhZ2UiOiJlbiJ9?language=en' },
