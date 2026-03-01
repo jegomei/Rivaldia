@@ -224,7 +224,7 @@ function renderJuegosBotones(myData, friendData, friendColor) {
       btn.classList.add('juego-btn--unplayed');
       btn.innerHTML = `<span class="juego-btn-name">${juego.label}</span>
                        <span class="juego-btn-status">Toca para jugar →</span>`;
-      btn.addEventListener('click', () => abrirJuego(juego.label, juego.url, juego.id));
+      btn.addEventListener('click', () => abrirJuego(juego.label, juego.url));
 
     } else if (rawFriend === null) {
       btn.classList.add('juego-btn--waiting');
@@ -570,11 +570,10 @@ function copiarCodigo() {
 // UI — IFRAME DE JUEGOS (overlay fijo)
 // =============================================
 
-function abrirJuego(nombre, url, juegoId) {
-  const container = document.getElementById('gameContainer');
-  container.classList.toggle('overlay-mode', juegoId === 'cuordle');
-  document.getElementById('gameFrame').src = url;
-  container.style.display = 'flex';
+function abrirJuego(nombre, url) {
+  document.getElementById('gameTitle').textContent        = nombre;
+  document.getElementById('gameFrame').src                = url;
+  document.getElementById('gameContainer').style.display = 'flex';
 }
 
 function cerrarJuego() {
