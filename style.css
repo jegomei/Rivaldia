@@ -14,6 +14,11 @@
   box-sizing: border-box;
 }
 
+/* Impide el zoom táctil en iOS Safari (refuerzo junto al JS de touchmove) */
+html, body {
+  touch-action: pan-x pan-y;
+}
+
 body {
   font-family: system-ui, sans-serif;
   margin: 0;
