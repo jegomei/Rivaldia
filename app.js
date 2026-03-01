@@ -80,6 +80,7 @@ let currentFriendColor = COLORES[0];  // color del amigo actual (cargado en carg
 let myColor            = COLORES[0];
 let myNickname         = '';          // nickname propio (para ordenación alfabética en stats)
 let selectedColor      = COLORES[0];
+let favoriteUid        = null;        // UID del amigo favorito (pantalla de inicio por defecto)
 
 
 // =============================================
@@ -162,6 +163,9 @@ function abrirReto(friendUid, friendName, updateHash = true) {
   document.getElementById('challengeView').style.display  = 'block';
   document.getElementById('headerTitle').textContent      = `Reto con ${friendName}`;
 
+  // Mostrar "Favorito" solo si este reto NO es ya el favorito
+  document.getElementById('btnFavorito').style.display = (friendUid !== favoriteUid) ? 'block' : 'none';
+
   const hoy = fechaHoy();
   document.getElementById('todayDateLabel').textContent   = formatFecha(hoy);
 
@@ -175,12 +179,14 @@ function volverAlMain(updateHash = true) {
   document.getElementById('challengeView').style.display  = 'none';
   document.getElementById('mainView').style.display       = 'block';
   document.getElementById('headerTitle').textContent      = 'Rivaldia';
+  document.getElementById('btnFavorito').style.display    = 'none';
   if (updateHash) history.replaceState(null, '', location.pathname);
 }
 
 function abrirStats(year, month) {
   document.getElementById('challengeView').style.display = 'none';
   document.getElementById('statsView').style.display     = 'block';
+  document.getElementById('btnFavorito').style.display   = 'none';
   const NOMBRES_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                        'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   document.getElementById('statsMonthLabel').textContent  = `${NOMBRES_MES[month - 1]} ${year}`;
@@ -192,18 +198,21 @@ function volverAlChallenge() {
   document.getElementById('statsView').style.display      = 'none';
   document.getElementById('challengeView').style.display  = 'block';
   document.getElementById('headerTitle').textContent      = `Reto con ${currentFriend.name}`;
+  document.getElementById('btnFavorito').style.display    = (currentFriend.uid !== favoriteUid) ? 'block' : 'none';
 }
 
-// Navega al reto indicado en el hash de la URL (#reto/{uid})
+// Navega al reto indicado en el hash de la URL (#reto/{uid}).
+// Devuelve true si navegó, false si no había hash válido.
 async function navegarDesdeHash() {
   const hash = location.hash;                   // '#reto/abc123...'
-  if (!hash.startsWith('#reto/')) return;
+  if (!hash.startsWith('#reto/')) return false;
   const friendUid = hash.slice(6);              // '#reto/' = 6 chars
-  if (!friendUid) return;
+  if (!friendUid) return false;
   const snap = await getDoc(doc(db, 'users', friendUid));
-  if (!snap.exists()) return;                   // uid no válido → queda en main
+  if (!snap.exists()) return false;             // uid no válido → queda en main
   const name = snap.data().nickname || snap.data().displayName;
   abrirReto(friendUid, name, false);            // false: no modificar el hash
+  return true;
 }
 
 
@@ -694,7 +703,15 @@ async function crearPerfilSiNoExiste(user) {
   }
 
   await cargarPerfil(user.uid);
-  await navegarDesdeHash();
+  const navegadoPorHash = await navegarDesdeHash();
+  // Si no hay hash en la URL, abrir el reto favorito (si hay uno configurado)
+  if (!navegadoPorHash && favoriteUid) {
+    const favSnap = await getDoc(doc(db, 'users', favoriteUid));
+    if (favSnap.exists()) {
+      const name = favSnap.data().nickname || favSnap.data().displayName;
+      abrirReto(favoriteUid, name, false);
+    }
+  }
 }
 
 async function cargarPerfil(uid) {
@@ -702,8 +719,9 @@ async function cargarPerfil(uid) {
   if (!snap.exists()) return;
   const data = snap.data();
 
-  myColor    = data.color || COLORES[0];
-  myNickname = data.nickname || data.displayName || '';
+  myColor     = data.color || COLORES[0];
+  myNickname  = data.nickname || data.displayName || '';
+  favoriteUid = data.favoriteUid || null;
   aplicarColor(myColor);
 
   document.getElementById('userDisplayName').textContent  = data.nickname || data.displayName;
@@ -1060,6 +1078,18 @@ document.getElementById('btnCopyCode').addEventListener('click', copiarCodigo);
 
 // Añadir amigo
 document.getElementById('btnAddFriend').addEventListener('click', añadirAmigo);
+
+// Establecer reto favorito (pantalla de inicio al abrir la PWA)
+async function establecerFavorito() {
+  const user = auth.currentUser;
+  if (!user || !currentFriend) return;
+  await updateDoc(doc(db, 'users', user.uid), { favoriteUid: currentFriend.uid });
+  favoriteUid = currentFriend.uid;
+  document.getElementById('btnFavorito').style.display = 'none';
+  mostrar('Reto favorito guardado ✓');
+}
+
+document.getElementById('btnFavorito').addEventListener('click', establecerFavorito);
 
 // Ver estadísticas de un mes (delegación sobre lista dinámica)
 document.getElementById('mesesList').addEventListener('click', (e) => {
