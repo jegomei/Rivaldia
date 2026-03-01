@@ -571,9 +571,8 @@ function copiarCodigo() {
 // =============================================
 
 function abrirJuego(nombre, url) {
-  document.getElementById('gameTitle').textContent        = nombre;
   document.getElementById('gameFrame').src                = url;
-  document.getElementById('gameContainer').style.display = 'flex';
+  document.getElementById('gameContainer').style.display = 'block';
 }
 
 function cerrarJuego() {
