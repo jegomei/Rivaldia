@@ -140,7 +140,8 @@ onAuthStateChanged(auth, (user) => {
 function mostrarApp(user) {
   document.getElementById('loginScreen').style.display  = 'none';
   document.getElementById('appContainer').style.display = 'block';
-  document.getElementById('headerTitle').textContent    = 'Rivaldia';
+  document.getElementById('headerTitle').textContent    = 'Perfil';
+  renderInstallSection();
   crearPerfilSiNoExiste(user);
 }
 
@@ -178,7 +179,7 @@ function volverAlMain(updateHash = true) {
   currentFriend = null;
   document.getElementById('challengeView').style.display  = 'none';
   document.getElementById('mainView').style.display       = 'block';
-  document.getElementById('headerTitle').textContent      = 'Rivaldia';
+  document.getElementById('headerTitle').textContent      = 'Perfil';
   document.getElementById('btnFavorito').style.display    = 'none';
   if (updateHash) history.replaceState(null, '', location.pathname);
 }
@@ -993,6 +994,35 @@ async function guardar(campos) {
   await setDoc(doc(db, 'results', `${user.uid}_${hoy}`), campos, { merge: true });
 
   if (currentFriend) await cargarReto(user.uid, currentFriend.uid);
+}
+
+
+// =============================================
+// HELPERS UI — Sección de instalación PWA
+// =============================================
+
+function renderInstallSection() {
+  const hint = document.getElementById('installHint');
+
+  // Ya instalada como PWA → ocultar instrucciones (el icono sigue visible)
+  const isPWA = window.navigator.standalone === true ||
+                window.matchMedia('(display-mode: standalone)').matches;
+  if (isPWA) {
+    hint.style.display = 'none';
+    return;
+  }
+
+  const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+
+  if (isIOS) {
+    hint.innerHTML = 'Instala la app: en <strong>Safari</strong> pulsa <strong>□↑</strong> → <strong>Añadir a pantalla de inicio</strong>';
+  } else if (isAndroid) {
+    hint.innerHTML = 'Instala la app: en <strong>Chrome</strong> pulsa <strong>⋮</strong> → <strong>Añadir a pantalla de inicio</strong>';
+  } else {
+    hint.innerHTML = 'Abre esta página en Chrome o Safari desde tu móvil para instalarla.';
+  }
+  hint.style.display = 'block';
 }
 
 
