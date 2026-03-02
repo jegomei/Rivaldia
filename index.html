@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Rivaldia</title>
-  <link rel="stylesheet" href="style.css?v=12">
+  <link rel="stylesheet" href="style.css">
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
@@ -241,6 +241,20 @@
       if (now - _lastTouch < 300) e.preventDefault();
       _lastTouch = now;
     }, false);
+  </script>
+
+  <!-- Service Worker: gestiona caché y actualizaciones automáticas -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(err => {
+        console.warn('[SW] Error al registrar:', err);
+      });
+
+      // Cuando el nuevo SW toma el control → recargar para servir la versión fresca
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+    }
   </script>
 
 </body>
