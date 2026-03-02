@@ -456,13 +456,14 @@ main h1 {
 }
 
 #topBar {
-  height: 50px;
+  height: calc(50px + env(safe-area-inset-top));
   background: #222;
   color: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
+  padding-top: env(safe-area-inset-top);
   flex-shrink: 0;
 }
 
