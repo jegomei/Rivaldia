@@ -39,10 +39,10 @@ const db = getFirestore(firebaseApp);
 // =============================================
 const JUEGOS = [
   { id: 'sumplete',       label: 'Sumplete',       icon: 'icons/sumplete.png', url: 'https://sumplete.com/daily' },
-  { id: 'shikaku_easy',   label: 'Shikaku Easy',   icon: 'icons/shikaku.png',  url: 'https://shikakuofthe.day/' },
-  { id: 'shikaku_medium', label: 'Shikaku Medium',  icon: 'icons/shikaku.png',  url: 'https://shikakuofthe.day/' },
-  { id: 'cinco',          label: 'Cinco',           icon: 'icons/cinco.png',    url: 'https://embed.puzzlepass.io/eyJwbGF5ZXJJZCI6IktkR2ZjZ0xURElBSVY5cE42MUpuIiwidXNlcklkIjoiYWx2YXJvaXJlZ3VpOTJAZ21haWwuY29tIiwibGFuZ3VhZ2UiOiJlbiJ9?language=en' },
-  { id: 'cuordle',        label: 'Cuordle',         icon: 'icons/cuordle.ico',  url: 'https://jegomei.github.io/Cuardle/' },
+  { id: 'shikaku_easy',   label: 'Shikaku Easy',   icon: 'icons/shikaku_easy.png',   url: 'https://shikakuofthe.day/' },
+  { id: 'shikaku_medium', label: 'Shikaku Medium',  icon: 'icons/shikaku_medium.png', url: 'https://shikakuofthe.day/' },
+  { id: 'cinco',          label: 'Cinco',           icon: 'icons/cinco.png',          url: 'https://embed.puzzlepass.io/eyJwbGF5ZXJJZCI6IktkR2ZjZ0xURElBSVY5cE42MUpuIiwidXNlcklkIjoiYWx2YXJvaXJlZ3VpOTJAZ21haWwuY29tIiwibGFuZ3VhZ2UiOiJlbiJ9?language=en' },
+  { id: 'cuordle',        label: 'Cuordle',         icon: 'icons/cuordle.png',        url: 'https://jegomei.github.io/Cuardle/' },
 ];
 
 const COLORES = [
