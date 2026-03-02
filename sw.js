@@ -6,7 +6,7 @@
 //    La PWA se actualizará sola la próxima vez que se abra.
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'rivaldia-v1';
+const CACHE_VERSION = 'rivaldia-v2';
 
 // Archivos que se pre-cachean al instalar el SW
 const ASSETS = [
@@ -29,9 +29,17 @@ const ASSETS = [
 ];
 
 // ── Instalación: pre-cachear todos los assets estáticos ────
+// Usamos cache:'reload' para saltarnos el HTTP cache del navegador
+// y garantizar que siempre se cachea la versión más reciente del servidor.
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_VERSION).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_VERSION).then(cache =>
+      Promise.all(
+        ASSETS.map(url =>
+          fetch(new Request(url, { cache: 'reload' })).then(res => cache.put(url, res))
+        )
+      )
+    )
   );
   // Activar de inmediato, sin esperar a que cierren otras pestañas
   self.skipWaiting();
