@@ -1077,16 +1077,16 @@ function cerrarJuego() {
 async function leerResultado() {
   try {
     const texto = await navigator.clipboard.readText();
-
-    // --- SUMPLETE ---
-    if (texto.includes('#sumplete')) {
-      const match = texto.match(/in\s+(\d{2}:\d{2}\.\d{2})/);
-      if (match) {
-        await guardar({ sumplete: match[1] });
-        mostrar(`Sumplete → ${match[1]} ✓`);
-        return;
-      }
-    }
+// --- SUMPLETE ---
+if (texto.includes('#Sumplete') || texto.includes('#sumplete')) {
+  const match = texto.match(/⏱️\s*(\d{2}:\d{2}\.\d{2})/);
+  if (match) {
+    await guardar({ sumplete: match[1] });
+    mostrar(`Sumplete → ${match[1]} ✓`);
+    return;
+  }
+}
+    
 
     // --- SHIKAKU ---
     if (texto.includes('#ShikakuOfTheDay')) {
