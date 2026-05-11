@@ -1078,12 +1078,14 @@ async function leerResultado() {
   try {
     const texto = await navigator.clipboard.readText();
     // --- SUMPLETE / SUMPLY ---
-    const sumplyMatch =
-      texto.match(/#(?:Sumplete|Sumply)\b[\s\S]*?⏱️\s*(\d{1,2}:\d{2}(?:\.\d{1,2})?)/i) ||
-      texto.match(/He terminado el Sumply de hoy en\s+(\d{1,2}:\d{2}(?:\.\d{1,2})?)/i);
+    const textoNormalizado = texto.normalize('NFKC').replace(/\u00a0/g, ' ');
+    const sumplyMatch = textoNormalizado.match(
+      /(?:#\s*)?(?:Sumplete|Sumply)\b[\s\S]*?(\d{1,3}:\d{2}(?:[\.,]\d{1,2})?)/i
+    );
     if (sumplyMatch) {
-      await guardar({ sumplete: sumplyMatch[1] });
-      mostrar(`Sumply → ${sumplyMatch[1]} ✓`);
+      const tiempo = sumplyMatch[1].replace(',', '.');
+      await guardar({ sumplete: tiempo });
+      mostrar(`Sumply → ${tiempo} ✓`);
       return;
     }
     
