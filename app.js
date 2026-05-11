@@ -38,7 +38,7 @@ const db = getFirestore(firebaseApp);
 // CONFIG — Juegos (fuente de verdad única)
 // =============================================
 const JUEGOS = [
-  { id: 'sumplete',       label: 'Sumplete',       icon: 'icons/sumplete.png', url: 'https://sumplete.com/daily' },
+  { id: 'sumplete',       label: 'Sumply',       icon: 'icons/sumply.png', url: 'https://jegomei.github.io/sumply/' },
   { id: 'shikaku_easy',   label: 'Shikaku Easy',   icon: 'icons/shikaku_easy.png',   url: 'https://shikakuofthe.day/' },
   { id: 'shikaku_medium', label: 'Shikaku Medium',  icon: 'icons/shikaku_medium.png', url: 'https://shikakuofthe.day/' },
   { id: 'cinco',          label: 'Cincoku',         icon: 'icons/cinco.png',          url: 'https://jegomei.github.io/Cincoku/' },
