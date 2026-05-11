@@ -1078,11 +1078,11 @@ async function leerResultado() {
   try {
     const texto = await navigator.clipboard.readText();
 // --- SUMPLETE ---
-if (texto.includes('#Sumplete') || texto.includes('#sumplete')) {
-  const match = texto.match(/⏱️\s*(\d{2}:\d{2}\.\d{2})/);
+if (texto.includes('#Sumplete') || texto.includes('#sumplete')|| texto.includes('#Sumply')|| texto.includes('#sumply')) {
+  const match = texto.match(/⏱️\s*(\d{2}:\d{2}\.\d{2})/)||  texto.match(/He terminado el Sumply de hoy en (\d{2}:\d{2}(?:\.\d{2})?)/);
   if (match) {
     await guardar({ sumplete: match[1] });
-    mostrar(`Sumplete → ${match[1]} ✓`);
+    mostrar(`Sumply → ${match[1]} ✓`);
     return;
   }
 }
