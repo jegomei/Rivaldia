@@ -6,7 +6,7 @@
 //    La PWA se actualizará sola la próxima vez que se abra.
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'rivaldia-v17';
+const CACHE_VERSION = 'rivaldia-v18';
 
 // Archivos que se pre-cachean al instalar el SW
 const ASSETS = [
@@ -22,7 +22,7 @@ const ASSETS = [
   './icon-180.png',
   './icon-maskable-192.png',
   './icon-maskable-512.png',
-  './icons/sumplete.png',
+  './icons/sumply.png',
   './icons/shikaku_easy.png',
   './icons/shikaku_medium.png',
   './icons/cinco.png',

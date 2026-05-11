@@ -1077,15 +1077,15 @@ function cerrarJuego() {
 async function leerResultado() {
   try {
     const texto = await navigator.clipboard.readText();
-// --- SUMPLETE ---
-if (texto.includes('#Sumplete') || texto.includes('#sumplete')|| texto.includes('#Sumply')|| texto.includes('#sumply')) {
-  const match = texto.match(/⏱️\s*(\d{2}:\d{2}\.\d{2})/)||  texto.match(/He terminado el Sumply de hoy en (\d{2}:\d{2}(?:\.\d{2})?)/);
-  if (match) {
-    await guardar({ sumplete: match[1] });
-    mostrar(`Sumply → ${match[1]} ✓`);
-    return;
-  }
-}
+    // --- SUMPLETE / SUMPLY ---
+    const sumplyMatch =
+      texto.match(/#(?:Sumplete|Sumply)\b[\s\S]*?⏱️\s*(\d{1,2}:\d{2}(?:\.\d{1,2})?)/i) ||
+      texto.match(/He terminado el Sumply de hoy en\s+(\d{1,2}:\d{2}(?:\.\d{1,2})?)/i);
+    if (sumplyMatch) {
+      await guardar({ sumplete: sumplyMatch[1] });
+      mostrar(`Sumply → ${sumplyMatch[1]} ✓`);
+      return;
+    }
     
 
     // --- SHIKAKU ---
